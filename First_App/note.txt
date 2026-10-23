@@ -1,0 +1,46 @@
+1. Node.js
+
+Node.js is a JavaScript runtime environment built on Chrome's V8 JavaScript engine.
+
+- It allows JavaScript to run outside the browser.
+- It is commonly used to build backend applications, servers, and APIs.
+
+2. Express.js
+
+Express.js is a web framework for Node.js.
+
+- It is used to build REST APIs and web servers.
+- It provides routing, middleware, and request/response handling.
+- It helps developers build backend applications more easily.
+
+3. Mongoose
+
+Mongoose is an ODM (Object Data Modeling) library for MongoDB and Node.js.
+
+- It helps connect a Node.js application to MongoDB.
+- It provides schemas and models to structure and manage data.
+- It supports data validation and database operations such as CRUD.
+
+Note: Mongoose is not the database itself. MongoDB is the database, and Mongoose helps your Node.js application interact with it.
+
+Node.js Backend — Short Notes
+
+ 1. Backend Handles
+
+    1. Data: Strings, numbers, arrays, objects, JSON, etc.
+    2. Files: Images, PDFs, videos, documents, etc.
+    3. Third-Party APIs: Google Login, payment gateways, email services, etc.       
+
+ 2. Node.js Project Structure
+
+- index.js — Main entry point; starts the server.
+- app.js — Configures Express, middleware, and routes.
+- config/ — Application and external service configuration.
+- constants/ — Fixed values, database names, and enums.
+- db/ — Database connection and setup.
+- models/ — Database schemas and models.
+- controllers/ — Handles requests and responses.
+- routes/ — Defines API endpoints, such as /login and /signup.
+- middlewares/ — Authentication, authorization, validation, and error handling.
+- services/ — Business logic and third-party integrations. 
+- utils/ — Reusable helper functions.
