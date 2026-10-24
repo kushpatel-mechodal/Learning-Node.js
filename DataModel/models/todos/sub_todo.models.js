@@ -8,17 +8,17 @@ const subTodoSchema = new mongoose.Schema(
       lowercase: true,
     },
     complete: {
-      type: String,
+      type: Boolean,
       default: false,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
+      ref: "User" 
     },
   }, 
   {
     timestamps: true,
   }, 
 );
-
+ 
 export const SubTodo = mongoose.model("SubTodo", subTodoSchema);
