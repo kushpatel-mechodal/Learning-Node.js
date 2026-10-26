@@ -44,3 +44,6 @@ Node.js Backend — Short Notes
 - middlewares/ — Authentication, authorization, validation, and error handling.
 - services/ — Business logic and third-party integrations. 
 - utils/ — Reusable helper functions.
+
+Note: images can not store in database because the buffer to store images,pdf is havy so that the store
+other server to store and use folder public url
