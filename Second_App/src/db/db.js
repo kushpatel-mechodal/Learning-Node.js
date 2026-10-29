@@ -1,19 +1,27 @@
-import mysql from "mysql2/promise"; //import mysql package
+import "dotenv/config";
+import { Sequelize } from "sequelize";
 
+//configure the sequelize with mysql database
+const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    dialect: "mysql",
+    logging: false, //use for terminal to print or not sql queries
+  }
+);
 const connectDB = async () => {
   try {
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-    });
-
-    console.log("Database connected to server:", connection.config.host);
+    await sequelize.authenticate(); //use authentication method for check if database is connected or not
+    console.log("Database connected to server: ", process.env.DB_HOST);
+    return sequelize;
   } catch (error) {
-    console.log("Failed to connect mongodb", error.message);
+    console.error("Failed to connect to MySQL database:", error.message || error);
     process.exit(1);
   }
 };
 
 export default connectDB;
+export { sequelize };
