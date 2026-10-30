@@ -38,7 +38,9 @@ const startServer = async () => {
     console.log("Database connected successfully");
 
     await user.describe();
-    console.log("User model connected with existing table successfully");
+    console.log(
+      "user and video model connected with existing table successfully"
+    );
 
     const port = process.env.PORT || 8000;
 

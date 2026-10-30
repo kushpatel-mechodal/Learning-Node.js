@@ -18,7 +18,10 @@ const connectDB = async () => {
     console.log("Database connected to server: ", process.env.DB_HOST);
     return sequelize;
   } catch (error) {
-    console.error("Failed to connect to MySQL database:", error.message || error);
+    console.error(
+      "Failed to connect to MySQL database:",
+      error.message || error
+    );
     process.exit(1);
   }
 };
