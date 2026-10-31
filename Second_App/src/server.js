@@ -1,43 +1,14 @@
-import express from "express";
 import "dotenv/config";
 import connectDB from "./db/db.js";
-import cors from "cors";
-import cookieParser from "cookie-parser";
+import app from "./app.js";
 import user from "./models/user.models.js";
-
-const app = express();
-
-//middleware configuration
-
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true,
-  })
-); //use middleware
-
-app.use(
-  express.json({
-    limit: "50kb",
-  })
-);
-
-app.use(
-  express.urlencoded({
-    limit: "50kb",
-  })
-); //use for receive data to url
-
-app.use(express.static("public")); //use for temporary files such as images,videos
-
-app.use(cookieParser()); //use for server side to access and set cookies for browser and securely perform the crud operation
 
 const startServer = async () => {
   try {
     await connectDB();
     console.log("Database connected successfully");
 
-    await user.describe();
+    await user.describe(); //use describe for the read the table column infromation
     console.log(
       "user and video model connected with existing table successfully"
     );
