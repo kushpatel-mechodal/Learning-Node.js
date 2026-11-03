@@ -39,7 +39,7 @@ const registerUser = asyncHandler(async (req, res) => {
       [Op.or]: [{ username }, { email }],
     },
   });
-
+  console.log("Existing user:",existedUser);
   if (existedUser) {
     throw new apiError(409, "Username and email is already exist");
   }
@@ -69,7 +69,7 @@ const registerUser = asyncHandler(async (req, res) => {
     password,
   });
 
-  const createdUser = user.toJSON();
+  const createdUser = user.toJSON(); //convert to js object
 
   delete createdUser.password;
   delete createdUser.refreshToken;
