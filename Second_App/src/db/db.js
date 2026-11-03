@@ -10,6 +10,9 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST,
     dialect: "mysql",
     logging: false, //use for terminal to print or not sql queries
+    define: {
+      underscored: true,
+    },
   }
 );
 const connectDB = async () => {

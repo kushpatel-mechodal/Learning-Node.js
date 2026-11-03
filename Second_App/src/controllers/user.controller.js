@@ -18,6 +18,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // receive formdata and json data using req.body
   const { username, email, fullname, password } = req.body;
+  console.log(req.body);
   /* console.log("username", username);
    console.log("email", email);
    console.log("fullname", fullname);
@@ -39,14 +40,21 @@ const registerUser = asyncHandler(async (req, res) => {
       [Op.or]: [{ username }, { email }],
     },
   });
-  console.log("Existing user:",existedUser);
+  console.log("Existing user:", existedUser);
+  console.log("req.files:", req.files);
+
   if (existedUser) {
     throw new apiError(409, "Username and email is already exist");
   }
 
+  console.log(existedUser);
+
   // receive the path
-  const avatarLocalPath = req.files?.avatar?.[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
+  const avatarLocalPath = req.files?.avatar?.[0]?.path; //get the localfilepath
+  const coverImageLocalPath = req.files?.coverImage?.[0]?.path; //get the localfilepath
+
+  console.log("Avatar path:", avatarLocalPath);
+  console.log("Cover path:", coverImageLocalPath);
 
   if (!avatarLocalPath) {
     throw new apiError(400, "Avatar image is required");
@@ -78,6 +86,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new apiError(500, "Something went wrong");
   }
 
+  // return the response
   return res
     .status(201)
     .json(new apiResponse(201, createdUser, "User registered successfully"));

@@ -43,6 +43,7 @@ const user = sequelize.define(
   },
   {
     tableName: "users",
+    underscored: true, //Use underscore in database column names
     timestamps: true,
     //use indexes for searching data
     indexes: [

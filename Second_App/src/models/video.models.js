@@ -44,6 +44,7 @@ const video = sequelize.define(
   {
     tableName: "videos",
     timestamps: true,
+    underscored: true,
   }
 );
 
