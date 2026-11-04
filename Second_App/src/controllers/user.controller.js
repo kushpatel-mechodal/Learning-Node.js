@@ -4,6 +4,23 @@ import User from "../models/user.models.js";
 import { Op, where } from "sequelize";
 import { uploadOnCloudinary } from "../utils/fileUpload.js";
 import apiResponse from "../utils/apiResponse.js";
+import { error } from "console";
+
+const generateAccessAndRefreshTokens = async (userid) => {
+  try {
+    const user = await User.findByPk(userid);
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    user.refreshToken = refreshToken;
+
+    await user.save({ validate: false }); //not save all the record only add the save refresh token
+
+    return { accessToken, refreshToken };
+  } catch (error) {
+    throw new apiError(500, "Error for generate access and refresh tokens");
+  }
+};
 
 const registerUser = asyncHandler(async (req, res) => {
   // step 1: get user details from user
@@ -92,4 +109,89 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new apiResponse(201, createdUser, "User registered successfully"));
 });
 
-export default registerUser;
+const loginUser = asyncHandler(async (req, res) => {
+  /* step 1: get the email and password from user
+     step 2: login based on email or username
+     step 3: find the user
+     step 4: password check
+     step 5: generate access token and refresh token
+     step 6: send secure cookie */
+
+  const { email, username, password } = req.body;
+
+  if (!email) {
+    throw new apiError(400, "Email is required");
+  }
+
+  const user = await User.findOne({
+    where: {
+      [Op.or]: [{ email }],
+    },
+  });
+
+  if (!user) {
+    throw new apiError(404, "User does not exists");
+  }
+
+  const isPasswordValid = await user.isPasswordCorrect(password);
+
+  if (!isPasswordValid) {
+    throw new apiError(401, "invalid user credentials");
+  }
+
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+    user.id
+  );
+
+  const loggedInUser = await User.findByPk(user.id).select(
+    "-password -refreshToken "
+  );
+
+  // add option for securly access cookie from server side
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new apiResponse(
+        200,
+        {
+          user: loggedInUser,
+          accessToken,
+          refreshToken,
+        },
+        "User loggedin successfully"
+      )
+    );
+});
+
+const logOutUser = asyncHandler(async (req, res) => {
+  await User.update(
+    {
+      refreshToken: undefined,
+    },
+    {
+      where: {
+        id: req.user.id,
+      },
+    }
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new apiResponse(200, {}, "user logged out successfully"));
+});
+
+export { registerUser, loginUser, logOutUser };
