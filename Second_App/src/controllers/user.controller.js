@@ -4,13 +4,15 @@ import User from "../models/user.models.js";
 import { Op, where } from "sequelize";
 import { uploadOnCloudinary } from "../utils/fileUpload.js";
 import apiResponse from "../utils/apiResponse.js";
-import { error } from "console";
+import jwt from "jsonwebtoken";
+
+// import { error } from "console";
 
 const generateAccessAndRefreshTokens = async (userid) => {
   try {
     const user = await User.findByPk(userid);
-    const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
 
     user.refreshToken = refreshToken;
 
@@ -18,7 +20,10 @@ const generateAccessAndRefreshTokens = async (userid) => {
 
     return { accessToken, refreshToken };
   } catch (error) {
-    throw new apiError(500, "Error for generate access and refresh tokens");
+    throw new apiError(
+      500,
+      error.message || "Error for generate access and refresh tokens"
+    );
   }
 };
 
@@ -143,9 +148,11 @@ const loginUser = asyncHandler(async (req, res) => {
     user.id
   );
 
-  const loggedInUser = await User.findByPk(user.id).select(
-    "-password -refreshToken "
-  );
+  const loggedInUser = await User.findByPk(user.id, {
+    attributes: {
+      exclude: ["password", "refreshToken"], //use for not send this fields
+    },
+  });
 
   // add option for securly access cookie from server side
   const options = {
@@ -194,4 +201,55 @@ const logOutUser = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, {}, "user logged out successfully"));
 });
 
-export { registerUser, loginUser, logOutUser };
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  const incomingRefreshToken =
+    req.cookies.refreshToken || req.body.refreshToken;
+
+  if (!incomingRefreshToken) {
+    throw new apiError(401, "Unauthorized request");
+  }
+
+  try {
+    const decodedToken = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    const user = await User.findByPk(decodedToken?.id);
+
+    if (!user) {
+      throw new apiError(401, "Invalid refresh token");
+    }
+
+    if (incomingRefreshToken !== user?.refreshToken) {
+      throw new apiError(401, "Refresh token is expired");
+    }
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    const { accessToken, newRefreshToken } =
+      await generateAccessAndRefreshTokens(user.id);
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", newRefreshToken, options)
+      .json(
+        new apiResponse(
+          200,
+          {
+            accessToken,
+            refreshToken: newRefreshToken,
+          },
+          "access token generated "
+        )
+      );
+  } catch (error) {
+    throw new apiError(401, error.message || "Invalid refresh token");
+  }
+});
+
+export { registerUser, loginUser, logOutUser, refreshAccessToken };
