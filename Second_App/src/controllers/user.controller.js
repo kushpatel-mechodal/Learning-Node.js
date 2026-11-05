@@ -252,4 +252,65 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-export { registerUser, loginUser, logOutUser, refreshAccessToken };
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  const user = await User.findByPk(req.user?.id);
+
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+  if (!isPasswordCorrect) {
+    throw new apiError(401, "Enter correct password");
+  }
+
+  user.password = newPassword; //set the new password
+
+  await user.save({
+    validate: false,
+  });
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, {}, "Password change successfully"));
+});
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res.status(200).json(200, req.user, "current user fetch successfully");
+});
+
+const updateAccount = asyncHandler(async (req, res) => {
+  const { username, fullname, email } = req.body;
+
+  if (!username || !fullname || !email) {
+    throw new apiError(400, "All fields required");
+  }
+
+  const user = await User.update(
+    req.user?.id,
+    {
+      username: username,
+      fullname: fullname,
+      email: email,
+    },
+    { new: true },
+    {
+      attributes: {
+        exclude: ["password"],
+      },
+    }
+  );
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, user, "User updated successfully"));
+});
+
+const updateUserAvatar = asyncHandler(async (req, res) => {});
+export {
+  registerUser,
+  loginUser,
+  logOutUser,
+  refreshAccessToken,
+  getCurrentUser,
+  changeCurrentPassword,
+};
