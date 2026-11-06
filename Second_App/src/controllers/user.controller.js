@@ -286,13 +286,16 @@ const updateAccount = asyncHandler(async (req, res) => {
   }
 
   const user = await User.update(
-    req.user?.id,
     {
-      username: username,
-      fullname: fullname,
-      email: email,
+      username,
+      fullname,
+      email,
     },
-    { new: true },
+    {
+      where: {
+        id: req.user?.id,
+      },
+    },
     {
       attributes: {
         exclude: ["password"],
@@ -305,7 +308,64 @@ const updateAccount = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, user, "User updated successfully"));
 });
 
-const updateUserAvatar = asyncHandler(async (req, res) => {});
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  const avatarLocalPath = req.file?.path;
+
+  if (!avatarLocalPath) {
+    throw new apiError(400, "avatar image is required");
+  }
+
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+  if (!avatar.url) {
+    throw new apiError(400, "Error while uploading avatar");
+  }
+
+  const user = await User.update(
+    {
+      avatar: avatar.url,
+    },
+    {
+      where: {
+        id: req.user?.id,
+      },
+    }
+  );
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, user, "Avatar image is updated successfully"));
+});
+
+const updateUserCoverImage = asyncHandler(async (req, res) => {
+  const coverImageLocalPath = req.file?.path;
+
+  if (!coverImageLocalPath) {
+    throw new apiError(400, "cover image is required");
+  }
+
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+
+  if (!coverImage.url) {
+    throw new apiError(400, "Error while uploading avatar");
+  }
+
+  const user = await User.update(
+    {
+      coverImage: coverImage.url,
+    },
+    {
+      where: {
+        id: req.user?.id,
+      },
+    }
+  );
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, user, "Cover image is updated successfully"));
+});
+
 export {
   registerUser,
   loginUser,
@@ -313,4 +373,7 @@ export {
   refreshAccessToken,
   getCurrentUser,
   changeCurrentPassword,
+  updateUserAvatar,
+  updateUserCoverImage,
+  updateAccount,
 };

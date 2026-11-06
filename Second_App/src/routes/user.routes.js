@@ -5,8 +5,12 @@ import {
   registerUser,
   refreshAccessToken,
   getCurrentUser,
-  changeCurrentPassword
+  changeCurrentPassword,
+  updateUserAvatar,
+  updateUserCoverImage,
+  updateAccount,
 } from "../controllers/user.controller.js";
+
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 const userRouter = Router();
