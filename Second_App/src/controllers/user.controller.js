@@ -5,6 +5,9 @@ import { Op, where } from "sequelize";
 import { uploadOnCloudinary } from "../utils/fileUpload.js";
 import apiResponse from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
+import QueryTypes from "sequelize";
+import { sequelize } from "../db/db.js";
+import subscription from "../models/subscription.models.js";
 
 // import { error } from "console";
 
@@ -366,6 +369,53 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, user, "Cover image is updated successfully"));
 });
 
+// get user channel details
+const getUserChannel = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+
+  if (!username?.trim()) {
+    throw new apiError(400, "Username is required");
+  }
+
+  const channel = await sequelize.query(
+    `SELECT users.id, users.fullname, users.email, users.avatar,
+    COUNT(sb.id) AS subscriberCount,
+    (SELECT COUNT(*) FROM subscription AS st
+    WHERE st.subscriber = users.id) AS channelsSubscribedToCount
+    FROM users LEFT JOIN subscription AS sb ON users.id = sb.channel
+    WHERE users.username = ?
+    GROUP BY users.id`,
+    {
+      replacements: [username.trim()],
+      type: QueryTypes.SELECT,
+    }
+  );
+
+  if (!channel.length) {
+    throw new apiError(404, "User not found");
+  }
+
+  const subscription = await Subscription.findOne({
+    where: {
+      subscriber: req.user?.id,
+      channel: channel[0].id,
+    },
+  });
+
+  const isSubscribed = subscription ? true : false;
+
+  return res.status(200).json(
+    new apiResponse(
+      200,
+      {
+        ...channel[0],
+        isSubscribed,
+      },
+      "User channel fetched successfully"
+    )
+  );
+});
+
 export {
   registerUser,
   loginUser,
@@ -376,4 +426,5 @@ export {
   updateUserAvatar,
   updateUserCoverImage,
   updateAccount,
+  getUserChannel,
 };

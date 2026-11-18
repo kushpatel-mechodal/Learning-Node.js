@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import { sequelize } from "../db/db";
+import { sequelize } from "../db/db.js";
 
 const subscription = sequelize.define(
   "Subscription",

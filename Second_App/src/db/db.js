@@ -15,6 +15,7 @@ const sequelize = new Sequelize(
     },
   }
 );
+
 const connectDB = async () => {
   try {
     await sequelize.authenticate(); //use authentication method for check if database is connected or not
