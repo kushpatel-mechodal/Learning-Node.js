@@ -5,9 +5,9 @@ import { Op, where } from "sequelize";
 import { uploadOnCloudinary } from "../utils/fileUpload.js";
 import apiResponse from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
-import QueryTypes from "sequelize";
+import { QueryTypes } from "sequelize";
 import { sequelize } from "../db/db.js";
-import subscription from "../models/subscription.models.js";
+import Subscription from "../models/subscription.models.js";
 
 // import { error } from "console";
 
@@ -416,6 +416,43 @@ const getUserChannel = asyncHandler(async (req, res) => {
   );
 });
 
+const getWatchHistory = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  const user = await sequelize.query(
+    `SELECT videos.*,u.fullname,u.username,u.avatar FROM users
+
+     LEFT JOIN JSON_TABLE(users.watch_history,
+  '$[*]' COLUMNS
+    (
+      id INT PATH '$'
+    )
+  ) AS history ON TRUE 
+
+  LEFT JOIN videos
+  ON history.id = videos.id
+
+  LEFT JOIN users AS u
+  ON videos.owner = u.id
+  
+  WHERE users.id = ?`,
+    {
+      replacements: [userId],
+      type: QueryTypes.SELECT,
+    }
+  );
+
+  return res
+    .status(200)
+    .json(
+      new apiResponse(
+        200,
+        user[0].watchHistory,
+        "Watch history fetch successfully"
+      )
+    );
+});
+
 export {
   registerUser,
   loginUser,
@@ -427,4 +464,5 @@ export {
   updateUserCoverImage,
   updateAccount,
   getUserChannel,
+  getWatchHistory,
 };
