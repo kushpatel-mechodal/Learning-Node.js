@@ -27,6 +27,7 @@
     "mongoose": "^9.11.4",
     "multer": "^2.5.0",
     "mysql2": "^3.24.6",
-    "sequelize": "^6.37.8"
+    "sequelize": "^6.37.8",
+    "sequelize-paginate": "^1.1.6"
   }
 }

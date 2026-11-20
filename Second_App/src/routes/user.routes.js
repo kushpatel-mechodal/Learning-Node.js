@@ -42,7 +42,7 @@ userRouter
   .post(verifyJWT, upload.single("avatar"), updateUserAvatar);
 userRouter
   .route("/updateUserCoverImage")
-  .post(verifyJWT, upload.single("/coverImage"), updateUserCoverImage);
+  .post(verifyJWT, upload.single("coverImage"), updateUserCoverImage);
 userRouter.route("/c/:username").get(verifyJWT, getUserChannel);
 userRouter.route("/getWatchHistory").get(verifyJWT, getWatchHistory);
 

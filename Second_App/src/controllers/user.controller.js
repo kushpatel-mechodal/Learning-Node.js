@@ -183,7 +183,7 @@ const loginUser = asyncHandler(async (req, res) => {
 const logOutUser = asyncHandler(async (req, res) => {
   await User.update(
     {
-      refreshToken: undefined,
+      refreshToken: null,
     },
     {
       where: {

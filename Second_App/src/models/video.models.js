@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../db/db.js";
 
-const video = sequelize.define(
+const Video = sequelize.define(
   "Video",
   {
     title: {
@@ -48,4 +48,6 @@ const video = sequelize.define(
   }
 );
 
-export default video;
+
+
+export default Video;
